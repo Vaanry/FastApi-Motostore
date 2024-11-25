@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <form method="post" action="/">
+        <div class="col-auto">
+            <div class="input-group mb-3">
+                <input type="text" name="message" value="{{ text }}" class="form-control"
+                       placeholder="Add new message" aria-label="Add message"
+                       aria-describedby="button-addon2"/>
+                <button class="btn btn-outline-primary" type="submit" id="button-addon2"
+                        data-mdb-ripple-color="dark">Add
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+{% if message %}
+<article class="card container-fluid">
+    <br/>
+    <h2>ID: {{ message.id }}</h2>
+    <p>
+        <strong>Text: {{ message.text }}</strong>
+    </p>
+</article>
+{% else %}
+<section class="container-fluid">
+    <h2>Messages</h2>
+    <br>
+    <div class="card">
+        <ul class="list-group list-group-flush">
+            {% for message in messages %}
+            <li class="list-group-item">{{ message.id }}. <a href="/message/{{message.id}}">{{ message.text }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

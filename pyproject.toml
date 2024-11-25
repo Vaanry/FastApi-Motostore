@@ -1,0 +1,26 @@
+[tool.black]
+line-length = 79
+target-version = ['py310']
+extend-exclude = '''
+(
+  migrations   # Django DB migrations
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+skip_gitignore = true
+skip_glob = ["**/migrations/*", "**/settings/*"]
+src_paths = ["<your_code_dir>"]
+
+[tool.mypy]
+mypy_path = "./src"
+follow_imports = "silent"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
