@@ -1,13 +1,19 @@
+from app.models import Catalog, Manufacturer
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
-
-from app.models import Manufacturer
 
 
 async def get_category_by_name(db: AsyncSession, name: str) -> Manufacturer:
     """Получить категорию по названию."""
-    return await db.scalar(select(Manufacturer).where(Manufacturer.name == name))
+    return await db.scalar(
+        select(Manufacturer).where(Manufacturer.name == name)
+    )
+
+
+async def get_product_by_model(db: AsyncSession, model: str) -> Catalog:
+    """Получить продукт по модели."""
+    return await db.scalar(select(Catalog).where(Catalog.model == model))
 
 
 async def check_admin_permissions(user: dict):
@@ -16,4 +22,13 @@ async def check_admin_permissions(user: dict):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You must be admin user for this",
+        )
+
+
+async def ensure_exists(entity, entity_name="Entity"):
+    """Убедиться, что объект существует."""
+    if entity is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{entity_name} not found.",
         )

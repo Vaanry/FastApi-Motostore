@@ -1,3 +1,4 @@
+from app.backend.config import Base
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -11,8 +12,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-from app.backend.config import Base
 
 
 class Users(Base):

@@ -1,19 +1,19 @@
 from datetime import datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.security import HTTPBasic
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy import select, insert
-
-from jose import jwt, JWTError
-
+from app.backend.db_depends import get_db
 from app.models import Users
 from app.schemas import CreateUser
-from app.backend.db_depends import get_db
-from typing import Annotated
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import (
+    HTTPBasic,
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+)
+from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import settings
 
@@ -63,10 +63,10 @@ async def authanticate_user(
 
 
 async def create_access_token(
-    username: str, tg_id: int, is_admin: bool, expires_delta: timedelta
+    username: str, id: int, is_admin: bool, expires_delta: timedelta
 ):
 
-    encode = {"sub": username, "id": tg_id, "is_admin": is_admin}
+    encode = {"sub": username, "id": id, "is_admin": is_admin}
     expires = datetime.now() + expires_delta
     encode.update({"exp": expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -76,13 +76,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        tg_id: int = payload.get("id")
+        id: int = payload.get("id")
         is_admin: str = payload.get("is_admin")
         expire = payload.get("exp")
-        if username is None or tg_id is None:
+        if username is None or id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user",
+                detail="Could not validate use1r",
             )
         if expire is None:
             raise HTTPException(
@@ -94,7 +94,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
                 status_code=status.HTTP_403_FORBIDDEN, detail="Token expired!"
             )
 
-        return {"username": username, "id": tg_id, "is_admin": is_admin}
+        return {"username": username, "id": id, "is_admin": is_admin}
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -121,7 +121,7 @@ async def login(
         )
     token = await create_access_token(
         user.username,
-        user.tg_id,
+        user.id,
         user.is_admin,
         expires_delta=timedelta(minutes=20),
     )

@@ -1,5 +1,4 @@
-from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ManufacturerBase(BaseModel):
@@ -30,26 +29,6 @@ class CreateModel(ModelBase):
 
 class ModelDB(ModelBase):
     id: int
-
-    class Config:
-        orm_mode = True
-
-
-class UserBase(BaseModel):
-    username: str
-    password: str
-
-
-class CreateUser(UserBase):
-    pass
-
-
-class User(BaseModel):
-    id: int
-    reg_date: datetime
-    balance: int = Field(None, ge=0)
-    is_admin: bool = Field(False, alias="is-admin")
-    active: bool = Field(True, alias="is-active")
 
     class Config:
         orm_mode = True
