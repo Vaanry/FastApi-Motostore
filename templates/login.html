@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+    <h1>Регистрация</h1>
+    <form method="post" action="/auth/login/">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username" required>
+        <br><br>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+        <button type="submit">Отправить</button>
+    </form>
+{% endblock %}

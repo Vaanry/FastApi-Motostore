@@ -1,3 +1,4 @@
+import asyncio
 from app.models import Catalog, Manufacturer
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -32,3 +33,11 @@ async def ensure_exists(entity, entity_name="Entity"):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"{entity_name} not found.",
         )
+
+
+async def remove_code_after_timeout(warehouse, username, timeout=300):
+    """
+    Удаляет код верификации через заданный таймаут.
+    """
+    await asyncio.sleep(timeout)
+    warehouse.pop(username, None)

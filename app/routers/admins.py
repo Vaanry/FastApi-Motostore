@@ -71,7 +71,7 @@ async def update_user_status(
 async def get_user(
     db: Annotated[AsyncSession, Depends(get_db)],
     get_user: Annotated[dict, Depends(get_current_user)],
-    username: str
+    username: str,
 ):
     await check_admin_permissions(get_user)
     user = await db.scalar(select(Users).where(Users.username == username))
