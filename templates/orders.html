@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <h1>Мои заказы</h1>
+    <br>
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Дата</th>
+                    <th>Модель</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.timestamp }}</td>
+                    <td>{{ order.model }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.purchase }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+

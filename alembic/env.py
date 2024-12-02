@@ -4,16 +4,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from app.backend.config import Base
-from app.models import (
-    Catalog,
-    Items,
-    Manufacturer,
-    Orders,
-    Payment,
-    Promo,
-    Users,
-    UsersPromo,
-)
+from app.models import Catalog, Items, Manufacturer, Orders, Payment, Users
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
 load_dotenv(".env")
 config = context.config
 
-config.set_main_option("sqlalchemy.url", os.environ["Async_DATABASE_URL"])
+config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

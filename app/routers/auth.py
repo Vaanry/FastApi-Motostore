@@ -8,9 +8,9 @@ from app.backend.db_depends import get_db
 from app.models import Users
 from app.schemas import CreateUser
 from app.utils import remove_code_after_timeout
-from fastapi import APIRouter, Depends, Form, HTTPException, status, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
 from fastapi.requests import Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import (
     HTTPBasic,
     OAuth2PasswordBearer,
@@ -46,15 +46,17 @@ verification_codes = {}
 hash_passwords = {}
 
 
-@router.get("/login", response_class=HTMLResponse)
-async def login_form(request: Request):
+@router.get("/registration", response_class=HTMLResponse)
+async def registration_form(request: Request):
     """
-    Отображает HTML-форму для входа.
+    Отображает HTML-форму для регистрации.
     """
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(
+        "login.html", {"request": request, "is_registration": True}
+    )
 
 
-@router.post("/login")
+@router.post("/registration")
 async def send_code_to_telegram(
     request: Request,
     db: Annotated[
@@ -82,7 +84,9 @@ async def send_code_to_telegram(
     # Генерируем код подтверждения
     verification_code = str(random.randint(100000, 999999))
     verification_codes[user.username] = verification_code
-    asyncio.create_task(remove_code_after_timeout(verification_codes, username))
+    asyncio.create_task(
+        remove_code_after_timeout(verification_codes, username)
+    )
 
     hash_passwords[user.username] = bcrypt_context.hash(user.password)
     asyncio.create_task(remove_code_after_timeout(hash_passwords, username))
@@ -95,7 +99,7 @@ async def send_code_to_telegram(
 
 
 # 2. Обработка формы и проверка кода
-@router.post("/verify-code/")
+@router.post("/verify-registration/")
 async def verify_code(
     db: Annotated[AsyncSession, Depends(get_db)],
     username: str = Form(...),
@@ -128,12 +132,14 @@ async def verify_code(
 
 
 async def authanticate_user(
-    db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str
+    db: Annotated[AsyncSession, Depends(get_db)], user_data: CreateUser
 ):
-    user = await db.scalar(select(Users).where(Users.username == username))
+    user = await db.scalar(
+        select(Users).where(Users.username == user_data.username)
+    )
     if (
         not user
-        or not bcrypt_context.verify(password, user.hashed_password)
+        or not bcrypt_context.verify(user_data.password, user.hashed_password)
         or user.active is False
         or user.hashed_password is None
     ):
@@ -143,6 +149,49 @@ async def authanticate_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+@router.get("/login/", response_class=HTMLResponse)
+async def login_form(request: Request):
+    """
+    Отображает HTML-форму для входа.
+    """
+    return templates.TemplateResponse(
+        "login.html", {"request": request, "is_registration": False}
+    )
+
+
+@router.post("/login/")
+async def auth_user(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+):
+
+    try:
+        user_data = CreateUser(username=username, password=password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Validation error: {e}")
+
+    check = await authanticate_user(db, user_data)
+    if check is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверное имя пользователя или пароль",
+        )
+    access_token = await create_access_token(
+        check.username,
+        check.id,
+        check.is_admin,
+        expires_delta=timedelta(minutes=20),
+    )
+    response.set_cookie(
+        key="users_access_token", value=access_token, httponly=True
+    )
+    return RedirectResponse(
+        url="/user/profile/", status_code=status.HTTP_302_FOUND
+    )
 
 
 async def create_access_token(
@@ -155,38 +204,39 @@ async def create_access_token(
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        id: int = payload.get("id")
-        is_admin: str = payload.get("is_admin")
-        expire = payload.get("exp")
-        if username is None or id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate use1r",
-            )
-        if expire is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No access token supplied",
-            )
-        if datetime.now() > datetime.fromtimestamp(expire):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Token expired!"
-            )
+# async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         username: str = payload.get("sub")
+#         id: int = payload.get("id")
+#         is_admin: str = payload.get("is_admin")
+#         expire = payload.get("exp")
+#         if username is None or id is None:
+#             raise HTTPException(
+#                 status_code=status.HTTP_401_UNAUTHORIZED,
+#                 detail="Could not validate use1r",
+#             )
+#         if expire is None:
+#             raise HTTPException(
+#                 status_code=status.HTTP_400_BAD_REQUEST,
+#                 detail="No access token supplied",
+#             )
+#         if datetime.now() > datetime.fromtimestamp(expire):
+#             raise HTTPException(
+#                 status_code=status.HTTP_403_FORBIDDEN, detail="Token expired!"
+#             )
 
-        return {"username": username, "id": id, "is_admin": is_admin}
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate user",
-        )
+#         return {"username": username, "id": id, "is_admin": is_admin}
+#     except JWTError:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Could not validate user",
+#         )
 
 
 @router.post("/token")
-async def login(response: Response, 
+async def login(
+    response: Response,
     db: Annotated[AsyncSession, Depends(get_db)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
@@ -204,32 +254,37 @@ async def login(response: Response,
         expires_delta=timedelta(minutes=20),
     )
     response.set_cookie(key="users_access_token", value=token, httponly=True)
-    
+
     return {"access_token": token, "token_type": "bearer"}
 
 
 def get_token(request: Request):
-    token = request.cookies.get('users_access_token')
+    token = request.cookies.get("users_access_token")
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token not found')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found"
+        )
     return token
 
 
-async def get_current_user1(token: str = Depends(get_token)):
+async def get_current_user(token: str = Depends(get_token)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Токен не валидный!')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Токен не валидный!",
+        )
 
-    expire = payload.get('exp')
+    expire = payload.get("exp")
     if expire is None:
         raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No access token supplied",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No access token supplied",
         )
     if datetime.now() > datetime.fromtimestamp(expire):
         raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Token expired!"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Token expired!"
         )
 
     username: str = payload.get("sub")
@@ -245,14 +300,15 @@ async def get_current_user1(token: str = Depends(get_token)):
 
 
 @router.get("/read_current_user")
-async def read_current_user(user: Users = Depends(get_current_user1)):
+async def read_current_user(user: Users = Depends(get_current_user)):
     return {"User": user}
 
 
 @router.get("/password", response_class=HTMLResponse)
-async def change_password(request: Request,
-    get_user: Annotated[dict, Depends(get_current_user1)],
-    ):
+async def change_password(
+    request: Request,
+    get_user: Annotated[dict, Depends(get_current_user)],
+):
     """
     Отображает HTML-форму для смены пароля.
     """
@@ -269,29 +325,33 @@ async def send_change_code_to_telegram(
     get_user: Annotated[dict, Depends(get_current_user)],
     password: str = Form(...),
 ):
+    username = get_user.get("username")
 
     try:
-        password = CreateUser(password=password)
+        CreateUser(username=username, password=password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Validation error: {e}")
 
-    id = get_user.get("id")
     tg_id = await db.scalar(
-        select(Users.tg_id).where(Users.id == id)
+        select(Users.tg_id).where(Users.username == username)
     )
     # Генерируем код подтверждения
     verification_code = str(random.randint(100000, 999999))
-    verification_codes[id] = verification_code
-    asyncio.create_task(remove_code_after_timeout(verification_codes, id))
+    verification_codes[username] = verification_code
+    asyncio.create_task(
+        remove_code_after_timeout(verification_codes, username)
+    )
 
-    hash_passwords[id] = bcrypt_context.hash(password)
-    asyncio.create_task(remove_code_after_timeout(hash_passwords, id))
+    hash_passwords[username] = bcrypt_context.hash(password)
+    asyncio.create_task(remove_code_after_timeout(hash_passwords, username))
 
     await bot.send_message(
         tg_id, f"Ваш код подтверждения: {verification_code}"
     )
 
-    return templates.TemplateResponse("verify_change.html", {"request": request})
+    return templates.TemplateResponse(
+        "verify_change.html", {"request": request}
+    )
 
 
 @router.post("/change_verify/")
@@ -301,21 +361,21 @@ async def change_verify_code(
     code: str = Form(...),
 ):
 
-    id = get_user.get("id")
+    username = get_user.get("username")
     # Проверяем, есть ли пользователь
-    if id not in verification_codes:
+    if username not in verification_codes:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
     # Проверяем код подтверждения
-    if verification_codes.get(id) == code:
-        del verification_codes[id]  # Удаляем код после подтверждения
+    if verification_codes.get(username) == code:
+        del verification_codes[username]  # Удаляем код после подтверждения
 
-        password = hash_passwords.get(id)
-        del hash_passwords[id]
+        password = hash_passwords.get(username)
+        del hash_passwords[username]
 
         await db.execute(
             update(Users)
-            .where(Users.id == id)
+            .where(Users.username == username)
             .values(
                 hashed_password=password,
             )

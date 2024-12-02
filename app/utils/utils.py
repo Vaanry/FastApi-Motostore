@@ -1,8 +1,10 @@
 import asyncio
+
 from app.models import Catalog, Manufacturer
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.inspection import inspect
 
 
 async def get_category_by_name(db: AsyncSession, name: str) -> Manufacturer:
@@ -41,3 +43,9 @@ async def remove_code_after_timeout(warehouse, username, timeout=300):
     """
     await asyncio.sleep(timeout)
     warehouse.pop(username, None)
+
+
+def sqlalchemy_to_dict(obj):
+    return {
+        c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs
+    }

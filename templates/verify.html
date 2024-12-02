@@ -2,7 +2,7 @@
 
 {% block crud_container %}
     <h1>Введите код подтверждения</h1>
-    <form action="/auth/verify-code/" method="post">
+    <form action="/auth/verify-registration/" method="post">
         <input type="text" name="code" placeholder="Код подтверждения" required><br>
         <button type="submit">Подтвердить</button>
     </form>

@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+    <h1>Профиль пользователя</h1>
+    <p><strong>ID:</strong> {{ user.id }}</p>
+    <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+    <p><strong>Telegram ID:</strong> {{ user.tg_id }}</p>
+    <p><strong>Дата регистрации:</strong> {{ user.reg_date }}</p>
+    <p><strong>Баланс:</strong> {{ user.balance }}</p>
+    <p><strong>Администратор:</strong> {{ "Да" if user.is_admin else "Нет" }}</p>
+    <p><strong>Активный:</strong> {{ "Да" if user.is_active else "Нет" }}</p>
+{% endblock %}

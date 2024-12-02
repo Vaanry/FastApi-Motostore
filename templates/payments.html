@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <h1>Мои платежи</h1>
+    <br>
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>UUID</th>
+                    <th>Дата</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.uuid }}</td>
+                    <td>{{ payment.timestamp }}</td>
+                    <td>{{ payment.amount }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+

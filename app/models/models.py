@@ -8,14 +8,13 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
 class Users(Base):
-    reg_date = Column(DateTime(timezone=True), server_default=func.now())
+    reg_date = Column(DateTime(timezone=False), server_default=func.now())
     tg_id = Column(BigInteger, unique=True)
     username = Column(String, unique=True)
     language = Column(String, default="en")
@@ -27,11 +26,10 @@ class Users(Base):
     hashed_password = Column(String)
     orders = relationship("Orders", backref="orders", lazy=True)
     payments = relationship("Payment", backref="payments", lazy=True)
-    promos = relationship("UsersPromo", backref="user_promos", lazy=True)
 
 
 class Payment(Base):
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    timestamp = Column(DateTime(timezone=False), server_default=func.now())
     tg_id = Column(BigInteger, ForeignKey("users.tg_id", ondelete="CASCADE"))
     amount = Column(Float, default=0)
     uuid = Column(String)
@@ -39,7 +37,7 @@ class Payment(Base):
 
 
 class Orders(Base):
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    timestamp = Column(DateTime(timezone=False), server_default=func.now())
     tg_id = Column(BigInteger, ForeignKey("users.tg_id", ondelete="CASCADE"))
     quantity = Column(Integer, default=0)
     model = Column(String, ForeignKey("catalog.model", ondelete="CASCADE"))
@@ -79,27 +77,3 @@ class Items(Base):
     age = Column(String, default=None)
     price = Column(Float, default=0)
     row = Column(String, unique=True)
-
-
-class Promo(Base):
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    is_promo = Column(Boolean, default=True)
-    file = Column(String, default=None)
-    downloads = Column(Integer, default=0)
-    users = relationship("UsersPromo", backref="promo_users", lazy=True)
-
-
-class UsersPromo(Base):
-    __table_args__ = (UniqueConstraint("tg_id", "promo_id"),)
-    tg_id = Column(
-        "tg_id",
-        BigInteger,
-        ForeignKey("users.tg_id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    promo_id = Column(
-        "promo_id",
-        Integer,
-        ForeignKey("promo.id", ondelete="CASCADE"),
-        nullable=False,
-    )
