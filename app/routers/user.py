@@ -17,6 +17,11 @@ router = APIRouter(prefix="/user", tags=["user"])
 
 
 templates = Jinja2Templates(directory="templates")
+templates.env.globals["is_authenticated"] = (
+    lambda request: hasattr(request.state, "user")
+    and request.state.user is not None
+)
+
 router.mount("/static", StaticFiles(directory="static"), name="static")
 
 

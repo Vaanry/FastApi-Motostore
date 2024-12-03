@@ -15,6 +15,9 @@ from app.utils import (
     get_product_by_model,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.requests import Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,12 +25,24 @@ from .auth import get_current_user
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
+templates = Jinja2Templates(directory="templates")
+templates.env.globals["is_authenticated"] = (
+    lambda request: hasattr(request.state, "user")
+    and request.state.user is not None
+)
+
+router.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # Обработчики категорий
-@router.get("/all_marks", response_model=list[ManufacturerDB])
-async def get_all_marks(db: Annotated[AsyncSession, Depends(get_db)]):
+@router.get("/", response_model=list[ManufacturerDB])
+async def get_all_marks(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+):
     categories = await db.scalars(select(Manufacturer))
-    return categories.all()
+    return templates.TemplateResponse(
+        "marks.html", {"request": request, "categories": categories}
+    )
 
 
 @router.get("/{mark}", response_model=ManufacturerDB)
@@ -101,32 +116,61 @@ async def delete_mark(
 
 # Обработчики продуктов
 @router.get("/models/all_models", response_model=list[ModelDB])
-async def get_all_models(db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_all_models(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+):
     products = await db.scalars(select(Catalog))
-    return products.all()
+    return templates.TemplateResponse(
+        "catalog.html",
+        {
+            "request": request,
+            "products": products,
+            "all": True,
+            "in_stock": False,
+        },
+    )
 
 
 @router.get("/models/in_stock", response_model=list[ModelDB])
-async def get_stock_models(db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_stock_models(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+):
     products = await db.scalars(select(Catalog).where(Catalog.quantity > 0))
-    return products.all()
+    return templates.TemplateResponse(
+        "catalog.html",
+        {
+            "request": request,
+            "products": products,
+            "all": True,
+            "in_stock": True,
+        },
+    )
 
 
 @router.get("/{mark}/models", response_model=list[ModelDB])
 async def product_by_mark(
-    db: Annotated[AsyncSession, Depends(get_db)], mark: str
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)], mark: str
 ):
     category = await get_category_by_name(db, mark)
     await ensure_exists(category, "Category")
     products = await db.scalars(
         select(Catalog).where(Catalog.manufacturer == mark)
     )
-    return products.all()
+    return templates.TemplateResponse(
+        "catalog.html",
+        {
+            "request": request,
+            "products": products,
+            "all": False,
+            "in_stock": False,
+            "mark": mark,
+        },
+    )
 
 
 @router.get("/{mark}/in_stock", response_model=list[ModelDB])
 async def product_by_mark_in_stock(
-    db: Annotated[AsyncSession, Depends(get_db)], mark: str
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)], mark: str
 ):
     category = await get_category_by_name(db, mark)
     await ensure_exists(category, "Category")
@@ -135,7 +179,16 @@ async def product_by_mark_in_stock(
             Catalog.manufacturer == mark, Catalog.quantity > 0
         )
     )
-    return products.all()
+    return templates.TemplateResponse(
+        "catalog.html",
+        {
+            "request": request,
+            "products": products,
+            "all": False,
+            "in_stock": True,
+            "mark": mark,
+        },
+    )
 
 
 @router.get("/models/detail/{model}", response_model=ModelDB)

@@ -3,30 +3,20 @@
 {% block crud_container %}
 <section class="container-fluid">
     <h1>Мои заказы</h1>
-    <br>
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Дата</th>
-                    <th>Модель</th>
-                    <th>Количество</th>
-                    <th>Сумма</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.timestamp }}</td>
-                    <td>{{ order.model }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.purchase }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div>
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="details">
+                <h2>ID: {{ order.id }}</h2>
+                <p>Дата: {{ order.timestamp }}</p>
+                <p>Модель: {{ order.model }}</p>
+                <p>Количество: {{ order.quantity }}</p>
+                <p>Сумма: {{ order.purchase }}</p>
+                <!-- Добавьте другие атрибуты по вашему усмотрению -->
+            </div>
+            <a href="/orders/{{ order.id }}">Смотреть всю информацию</a>
+        </div>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

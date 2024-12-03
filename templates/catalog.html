@@ -1,0 +1,29 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <h1>{% if all %}
+        {% if in_stock %}Модели в наличии{% else %}Все модели{% endif %}
+        {% else %}
+        {% if in_stock %}Модели {{ mark }} в наличии{% else %}Все модели {{ mark }}{% endif %}
+        {% endif %}
+    </h1>
+    <div>
+        {% for product in products %}
+        <div class="order-card">
+            <div class="details">
+                <h2>{{ product.manufacturer }} {{ product.model }}</h2>
+                <p>Тип: {{ product.type }}</p>
+                <p>Доступное количество: {{ product.quantity }}</p>
+
+                <!-- Добавьте другие атрибуты по вашему усмотрению -->
+            </div>
+            <ul>
+                <a href="/catalog//models/detail/{{ product.model }}">Подробнее</a>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,236 @@
+
+
+
+/* Стили для Navbar */
+.navbar {
+    border-bottom: 2px solid #ddd; /* Линия снизу */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem; /* Увеличенный размер бренда */
+    color: #007bff;
+    transition: color 0.3s ease;
+    
+}
+
+.navbar-brand:hover {
+    color: #0056b3; /* Темнее при наведении */
+    text-decoration: none;
+}
+
+.navbar-nav .nav-item .nav-link {
+    font-size: 1.1rem; /* Увеличенный шрифт ссылок */
+    color: #333; /* Основной цвет */
+    padding: 0.5rem 1rem; /* Отступы */
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+    color: #007bff; /* Изменение цвета текста */
+    background-color: rgba(0, 123, 255, 0.1); /* Лёгкая заливка */
+    border-radius: 5px; /* Скруглённые углы */
+}
+
+.navbar-toggler {
+    border-color: #007bff; /* Цвет кнопки */
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%280,123,255,0.5%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Активный элемент меню */
+.navbar-nav .nav-item .nav-link.active {
+    color: #fff; /* Белый текст */
+    background-color: #007bff; /* Основной цвет */
+    border-radius: 5px; /* Скруглённые углы */
+}
+
+/* Для маленьких экранов */
+@media (max-width: 992px) {
+    .navbar-nav .nav-item {
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+    .navbar {
+        padding: 1rem;
+    }
+}
+
+/* Основной стиль для nav-link */
+.nav-link {
+    color: #555; /* Основной цвет текста */
+    font-size: 1rem; /* Размер шрифта */
+    padding: 0.5rem 1rem; /* Отступы вокруг текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 4px; /* Скругление углов */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Анимация */
+}
+
+/* Эффект наведения на ссылку */
+.nav-link:hover {
+    color: #fff; /* Белый текст */
+    background-color: #007bff; /* Синий фон */
+    text-decoration: none; /* Убираем подчеркивание при наведении */
+}
+
+/* Стили для активной ссылки */
+.nav-link.active {
+    color: #fff; /* Белый текст */
+    background-color: #007bff; /* Основной цвет фона */
+    font-weight: bold; /* Полужирный текст */
+}
+
+/* Стили для фокуса на ссылке (клавиатурная навигация) */
+.nav-link:focus {
+    outline: 2px dashed #007bff; /* Обводка при фокусе */
+    outline-offset: 2px; /* Расстояние между обводкой и текстом */
+}
+
+/* Адаптация для маленьких экранов */
+@media (max-width: 768px) {
+    .nav-link {
+        padding: 0.8rem 1rem; /* Увеличиваем отступы для сенсорных устройств */
+        font-size: 1.2rem; /* Увеличиваем размер текста */
+        text-align: center; /* Выравнивание по центру */
+    }
+}
+
+
+/* Контейнер с полной шириной */
+.container-fluid {
+    width: 100%; /* Занимает всю ширину экрана */
+    padding-right: 15px; /* Отступы справа */
+    padding-left: 15px; /* Отступы слева */
+    margin-right: auto; /* Центрирование */
+    margin-left: auto; /* Центрирование */
+}
+
+/* Обеспечиваем адаптивность для контейнера */
+@media (min-width: 576px) {
+    .container-fluid {
+        max-width: 540px; /* Ограничиваем ширину на маленьких экранах */
+    }
+}
+
+@media (min-width: 768px) {
+    .container-fluid {
+        max-width: 720px; /* Ширина на средних экранах */
+    }
+}
+
+@media (min-width: 992px) {
+    .container-fluid {
+        max-width: 960px; /* Ширина на больших экранах */
+    }
+}
+
+@media (min-width: 1200px) {
+    .container-fluid {
+        max-width: 1140px; /* Ширина на экранах XL */
+    }
+}
+
+
+.order-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+
+.order-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+
+.order-card .details {
+    flex-grow: 1;
+}
+
+
+.order-card a {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+
+.order-card a:hover {
+    background-color: #0056b3;
+}
+
+
+
+/* Общие стили для страницы */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Контейнер для формы */
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок страницы */
+h1 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Стили формы */
+.registration-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Поля ввода */
+.registration-form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.registration-form input[type="password"],
+.registration-form input[type="text"] {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Кнопка отправки */
+.submit-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}

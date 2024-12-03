@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <h1>Марки мотоциклов</h1>
+    <a class="nav-link" href="/catalog/models/all_models">Все модели</a>
+    <a class="nav-link" href="/catalog/models/in_stock">Модели в наличии</a>
+    <div>
+        {% for category in categories %}
+        <div class="order-card">
+            <div class="details">
+                <h2>{{ category.name }}</h2>
+                <p>Страна-производитель: {{ category.country }}</p>
+
+                <!-- Добавьте другие атрибуты по вашему усмотрению -->
+            </div>
+            <ul>
+                <a href="/catalog/{{ category.name }}">Подробнее</a>
+                <a href="/catalog/{{ category.name }}/models">Все модели</a>
+                <a href="/catalog/{{ category.name }}/in_stock">Модели в наличии</a>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+

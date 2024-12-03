@@ -1,14 +1,16 @@
 {% extends "main.html" %}
 
 {% block crud_container %}
+<div class="container">
     <h1>{% if is_registration %}Регистрация{% else %}Вход{% endif %}</h1>
-    <form method="post" action="{% if is_registration %}/auth/registration/{% else %}/auth/login/{% endif %}">
+    <form id="registration-form" class="registration-form" method="post" action="{% if is_registration %}/auth/registration/{% else %}/auth/login/{% endif %}">
         <label for="username">Имя пользователя:</label>
         <input type="text" id="username" name="username" required>
         <br><br>
         <label for="password">Пароль:</label>
         <input type="password" id="password" name="password" required>
         <br><br>
-        <button type="submit">{% if is_registration %}Отправить{% else %}Войти{% endif %}</button>
+        <button type="submit" id="reg-button" class="submit-button">{% if is_registration %}Отправить{% else %}Войти{% endif %}</button>
     </form>
+</div>
 {% endblock %}

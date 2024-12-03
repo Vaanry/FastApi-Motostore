@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<div>
+    <div class="order-card">
+        <div class="details">
+        <h1>Информация о заказе</h1>
+            <p><strong>Дата:</strong> {{ order.timestamp }}</p>
+            <p><strong>Модель:</strong> {{ order.model }}</p>
+            <p><strong>Объём двигателя:</strong> {{ order.cc }}</p>
+            <p><strong>Мощность:</strong> {{ order.horsepower }}</p>
+            <p><strong>Год выпуска:</strong> {{ order.age }}</p>
+            <p><strong>Сумма заказа:</strong> {{ order.purchase }}</p>
+        </div>
+    </div>
+    {% for photo in photos %}
+        <ul><img src="{{ photo }}" alt="Order Image" width="200" height="150"></ul>
+    {% endfor %}
+    
+</div>
+{% endblock %}

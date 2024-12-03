@@ -1,6 +1,9 @@
 {% extends "main.html" %}
 
 {% block crud_container %}
+<div>
+    <div class="order-card">
+        <div class="details">
     <h1>Профиль пользователя</h1>
     <p><strong>ID:</strong> {{ user.id }}</p>
     <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
@@ -9,4 +12,8 @@
     <p><strong>Баланс:</strong> {{ user.balance }}</p>
     <p><strong>Администратор:</strong> {{ "Да" if user.is_admin else "Нет" }}</p>
     <p><strong>Активный:</strong> {{ "Да" if user.is_active else "Нет" }}</p>
+            <a class="nav-link" href="/user/my_orders">Мои заказы</a>
+            <a class="nav-link" href="/user/my_payments">Мои платежи</a>
+            <a class="nav-link" href="/auth/password">Сменить пароль</a>
+    </div>
 {% endblock %}
