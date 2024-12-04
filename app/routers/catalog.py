@@ -46,10 +46,14 @@ async def get_all_marks(
 
 
 @router.get("/{mark}", response_model=ManufacturerDB)
-async def get_mark(db: Annotated[AsyncSession, Depends(get_db)], mark: str):
+async def get_mark(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)], mark: str
+):
     category = await get_category_by_name(db, mark)
     await ensure_exists(category, "Category")
-    return category
+    return templates.TemplateResponse(
+        "cart.html", {"request": request, "moto": category, "type": "mark"}
+    )
 
 
 @router.post("/create_mark")
@@ -193,11 +197,13 @@ async def product_by_mark_in_stock(
 
 @router.get("/models/detail/{model}", response_model=ModelDB)
 async def product_detail(
-    db: Annotated[AsyncSession, Depends(get_db)], model: str
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)], model: str
 ):
     product = await get_product_by_model(db, model)
-    await ensure_exists(product, "Product")
-    return product
+    await ensure_exists(product, "Model")
+    return templates.TemplateResponse(
+        "cart.html", {"request": request, "moto": product, "type": "model"}
+    )
 
 
 @router.post("/models/create")

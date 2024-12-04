@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+
+{% block crud_container %}
+<section class="container-fluid">
+    <section class="container-fluid">
+        <h1>{% if model %}Мотоциклы {{ model }} в наличии{% else %}Все мотоциклы в наличии{% endif %}</h1>
+        <a class="nav-link" href="/catalog/models/all_models">Все модели</a>
+        <a class="nav-link" href="/catalog/models/in_stock">Модели в наличии</a>
+        <div>
+            {% for item in items %}
+            <div class="order-card">
+                <div class="details">
+                    <h2>{{ item.model }} {{ item.cc }}</h2>
+                    <p>Мощность: {{ item.horsepower }}</p>
+                    <p>Год выпуска: {{ item.age }}</p>
+                    <p>Цена: {{ item.price }}</p>
+    
+                    <!-- Добавьте другие атрибуты по вашему усмотрению -->
+                </div>
+                <ul>
+                    <img src="/static/items/{{ item.row }}" alt="Moto Image" width="200" height="150">
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+</section>
+{% endblock %}

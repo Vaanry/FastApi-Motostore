@@ -101,10 +101,12 @@ async def send_code_to_telegram(
 # 2. Обработка формы и проверка кода
 @router.post("/verify-registration/")
 async def verify_code(
+    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
     username: str = Form(...),
     code: str = Form(...),
 ):
+
     # Проверяем, есть ли пользователь
     if username not in verification_codes:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -124,7 +126,17 @@ async def verify_code(
             )
         )
         await db.commit()
-        return {"status": "Успешно подтверждено!"}
+        tg_id = await db.scalar(
+            select(Users.tg_id).where(Users.username == username)
+        )
+        await bot.send_message(tg_id, "Успешная регистрация!")
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "message": "Успешно подтверждено! Вы можете зайти со своим логином и паролем.",
+            },
+        )
     else:
         raise HTTPException(
             status_code=400, detail="Неверный код подтверждения"

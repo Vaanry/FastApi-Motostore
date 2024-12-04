@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+{% block crud_container %}
+<section class="container-fluid">
+    {% if type == "mark" %}
+    <h1>{{ moto.name }}</h1>
+    <div class="order-card">
+        <div class="details">
+            <p>Страна-производитель: {{ moto.country }}</p>
+        </div>
+        <ul>
+            <a href="/catalog/{{ moto.name }}/models">Все модели</a>
+            <a href="/catalog/{{ moto.name }}/in_stock">Модели в наличии</a>
+        </ul>
+    </div>
+    {% elif type == "model" %}
+    <h1>{{ moto.manufacturer }} {{ moto.model }}</h1>
+    <div class="order-card">
+        <div class="details">
+            <p>Тип: {{ moto.type }}</p>
+            <p>Доступное количество: {{ moto.quantity }}</p>
+        </div>
+        {% if moto.quantity>0%}
+        <ul>
+            <a href="/items/{{ moto.model }}">Смотреть мотоциклы</a>
+        </ul>
+        {% endif %}
+    </div>   
+    {% endif %}
+</section>
+{% endblock %}

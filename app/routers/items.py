@@ -9,6 +9,9 @@ from app.utils import (
     get_product_by_model,
 )
 from fastapi import APIRouter, Depends, status
+from fastapi.requests import Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,15 +19,28 @@ from .auth import get_current_user
 
 router = APIRouter(prefix="/items", tags=["items"])
 
+templates = Jinja2Templates(directory="templates")
+templates.env.globals["is_authenticated"] = (
+    lambda request: hasattr(request.state, "user")
+    and request.state.user is not None
+)
 
-@router.get("/all_items", response_model=list[ItemDB])
-async def get_all_items(db: Annotated[AsyncSession, Depends(get_db)]):
+router.mount("/static", StaticFiles(directory="static"), name="items")
+
+
+@router.get("/", response_model=list[ItemDB])
+async def get_all_items(
+    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+):
     items = await db.scalars(select(Items))
-    return items.all()
+    return templates.TemplateResponse(
+        "items.html", {"request": request, "items": items, "model": False}
+    )
 
 
 @router.get("/{model}", response_model=list[ItemDB])
 async def get_model_items(
+    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
     model: str,
 ):
@@ -32,7 +48,9 @@ async def get_model_items(
     await ensure_exists(model_, "Model")
 
     items = await db.scalars(select(Items).where(Items.model == model))
-    return items.all()
+    return templates.TemplateResponse(
+        "items.html", {"request": request, "items": items, "model": model}
+    )
 
 
 @router.get("/detail/{id}", response_model=ItemDB)
