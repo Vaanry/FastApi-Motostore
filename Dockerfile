@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . /app/
 
 # Выполняем миграции Alembic
-RUN alembic upgrade head
+#RUN alembic upgrade head
 
 # Указываем команду запуска
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
